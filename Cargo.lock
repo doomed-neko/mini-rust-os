@@ -16,15 +16,27 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.6.0"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
+checksum = "5c8214115b7bf84099f1309324e63141d4c5d7cc26862f97a0a857dbefe165bd"
 
 [[package]]
 name = "bootloader"
-version = "0.9.29"
+version = "0.9.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "365861702868e2a37b4247aaecc7bd8f4389baec8d025497ad8ba7ff37ee9440"
+checksum = "8a9c8b93781debeb5bc44a12adc4be812aa9feb659d60eeafcd7e9bedb549561"
+
+[[package]]
+name = "brevyos"
+version = "0.1.0"
+dependencies = [
+ "bootloader",
+ "lazy_static",
+ "spin 0.5.2",
+ "uart_16550",
+ "volatile 0.2.7",
+ "x86_64",
+]
 
 [[package]]
 name = "lazy_static"
@@ -36,33 +48,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ps2"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfef03bb1362e6a23a211efe8c72e2eeb6888f51fb329cdfa07bb470986ea7d0"
-dependencies = [
- "bitflags 1.3.2",
- "x86_64 0.14.13",
-]
-
-[[package]]
-name = "rust_os"
-version = "0.1.0"
-dependencies = [
- "bootloader",
- "lazy_static",
- "ps2",
- "spin 0.5.2",
- "uart_16550",
- "volatile 0.2.7",
- "x86_64 0.15.2",
-]
-
-[[package]]
 name = "rustversion"
-version = "1.0.19"
+version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7c45b9784283f1b2e7fb61b42047c2fd678ef0960d4f6f1eba131594cc369d4"
+checksum = "eded382c5f5f786b989652c49544c4877d9f015cc22e145a5ea8ea66c2921cd2"
 
 [[package]]
 name = "spin"
@@ -84,7 +73,7 @@ checksum = "614ff2a87880d4bd4374722268598a970bbad05ced8bf630439417347254ab2e"
 dependencies = [
  "bitflags 1.3.2",
  "rustversion",
- "x86_64 0.14.13",
+ "x86_64",
 ]
 
 [[package]]
@@ -106,19 +95,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c101112411baafbb4bf8d33e4c4a80ab5b02d74d2612331c61e8192fc9710491"
 dependencies = [
  "bit_field",
- "bitflags 2.6.0",
- "rustversion",
- "volatile 0.4.6",
-]
-
-[[package]]
-name = "x86_64"
-version = "0.15.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f042214de98141e9c8706e8192b73f56494087cc55ebec28ce10f26c5c364ae"
-dependencies = [
- "bit_field",
- "bitflags 2.6.0",
+ "bitflags 2.9.0",
  "rustversion",
  "volatile 0.4.6",
 ]
