@@ -3,9 +3,8 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(brevyos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-#![allow(clippy::empty_loop)]
 
-use brevyos::{init, println};
+use brevyos::{hlt_loop, init, println};
 use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)]
@@ -14,10 +13,12 @@ pub extern "C" fn _start() -> ! {
 
     init();
 
+    println!("It did not crash!");
+
     #[cfg(test)]
     test_main();
 
-    loop {}
+    hlt_loop();
 }
 
 /// This function is called on panic.
@@ -25,7 +26,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]

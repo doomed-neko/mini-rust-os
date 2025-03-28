@@ -66,20 +66,6 @@ pub struct Writer {
 }
 
 impl Writer {
-    fn back_space(&mut self) {
-        let blank = ScreenChar {
-            ascii_code: b' ',
-            color_code: self.color_code,
-        };
-        if self.column_position == 0 {
-            self.old_line();
-            return;
-        }
-        let row = BUFFER_HEIGHT - 1;
-        let col = self.column_position - 1;
-        self.buffer.chars[row][col].write(blank);
-        self.column_position -= 1;
-    }
     pub fn set_color(&mut self, color: Color) {
         self.color_code = ColorCode::new(color, Color::Black);
     }
@@ -121,15 +107,6 @@ impl Writer {
         self.clear_row(BUFFER_HEIGHT - 1);
         self.column_position = 0;
     }
-    fn old_line(&mut self) {
-        for row in (1..BUFFER_HEIGHT).rev() {
-            for col in 0..BUFFER_WIDTH {
-                let char = self.buffer.chars[row - 1][col].read();
-                self.buffer.chars[row][col].write(char);
-            }
-        }
-        self.column_position = 0;
-    }
     fn clear_row(&mut self, row: usize) {
         let blank = ScreenChar {
             ascii_code: b' ',
@@ -167,12 +144,9 @@ macro_rules! back_space {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
-}
-
-#[doc(hidden)]
-pub fn _backspace() {
-    WRITER.lock().back_space();
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 #[test_case]
@@ -189,10 +163,14 @@ fn test_many_println() {
 
 #[test_case]
 fn test_println_output() {
+    use core::fmt::Write;
     let s = "Test string";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let schar = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(c, char::from(schar.ascii_code));
-    }
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        writeln!(writer, "\n{}", s).expect("writeln failed");
+        for (i, c) in s.chars().enumerate() {
+            let schar = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(c, char::from(schar.ascii_code));
+        }
+    })
 }
