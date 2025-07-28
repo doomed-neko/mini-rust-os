@@ -4,16 +4,19 @@
 #![test_runner(brevyos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use brevyos::{hlt_loop, init, println};
+use bootloader::{BootInfo, entry_point};
+use brevyos::{hlt_loop, print, println};
 use core::panic::PanicInfo;
 
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
+    println!("{:?}", boot_info);
     println!("Hello World{}", "!");
 
-    init();
+    brevyos::init();
 
-    println!("It did not crash!");
+    print!("Welcome to BrevyOS / #");
 
     #[cfg(test)]
     test_main();

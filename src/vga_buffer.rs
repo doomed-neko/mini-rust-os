@@ -5,7 +5,7 @@ use spin::Mutex;
 lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
-        color_code: ColorCode::new(Color::Green, Color::Black),
+        color_code: ColorCode::new(Color::Magenta, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) }
     });
 }
@@ -88,6 +88,16 @@ impl Writer {
             }
         }
     }
+    // pub fn backspace(&mut self) {
+    //     let row = BUFFER_HEIGHT - 1;
+    //     let col = self.column_position - 1;
+    //     let color_code = self.color_code;
+    //     self.buffer.chars[row][col].write(ScreenChar {
+    //         ascii_code: 0x0,
+    //         color_code,
+    //     });
+    //     self.column_position -= 1;
+    // }
 
     pub fn write_string(&mut self, string: &str) {
         for byte in string.as_bytes() {
