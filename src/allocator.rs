@@ -1,6 +1,4 @@
-// use core::{alloc::GlobalAlloc, ptr::null_mut};
-
-use linked_list_allocator::LockedHeap;
+use spin::{Mutex, MutexGuard};
 use x86_64::{
     VirtAddr,
     structures::paging::{
@@ -8,10 +6,39 @@ use x86_64::{
     },
 };
 
+use crate::allocator::fixed_size_block::FixedSizeBlockAllocator;
+
+pub mod bump;
+pub mod fixed_size_block;
+pub mod linked_list;
+
 #[global_allocator]
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
+// static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
+// static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
+// static ALLOCATOR: LockedHeap = LockedHeap::empty();
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
+
+pub struct Locked<T> {
+    inner: Mutex<T>,
+}
+impl<T> Locked<T> {
+    pub const fn new(inner: T) -> Self {
+        Self {
+            inner: Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&'_ self) -> MutexGuard<'_, T> {
+        self.inner.lock()
+    }
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
+}
 
 // pub struct Dummy;
 //
