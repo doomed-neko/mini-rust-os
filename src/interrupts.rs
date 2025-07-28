@@ -1,12 +1,18 @@
-use crate::{gdt, hlt_loop, print, println};
+use crate::{gdt, hlt_loop, print, println, vga_buffer};
+use alloc::{string::String, vec::Vec};
 use lazy_static::lazy_static;
 use pc_keyboard::{DecodedKey, Keyboard, ScancodeSet1, layouts};
 use pic8259::ChainedPics;
 use spin::Mutex;
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
+use x86_64::{
+    instructions::nop,
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode},
+};
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
+
+pub static INPUT_BUFFER: Mutex<String> = Mutex::new(String::new());
 
 pub static PICS: Mutex<ChainedPics> =
     Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
@@ -80,15 +86,41 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     let mut port = Port::new(0x60);
 
     let scancode: u8 = unsafe { port.read() };
-    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-        if let Some(key) = keyboard.process_keyevent(key_event) {
-            match key {
-                DecodedKey::Unicode(character) => print!("{}", character),
-                DecodedKey::RawKey(_) => (),
-                // DecodedKey::Unicode('\x08') => without_interrupts(|| {
-                //     WRITER.lock().backspace();
-                // }),
+    if let Ok(Some(key_event)) = keyboard.add_byte(scancode)
+        && let Some(key) = keyboard.process_keyevent(key_event)
+        && let DecodedKey::Unicode(character) = key
+    {
+        if character == '\n' {
+            println!();
+            let mut i = INPUT_BUFFER.lock();
+            let args = i.clone();
+            let mut args = args.split(' ');
+            i.clear();
+            i.shrink_to(100);
+            let command = args.next();
+            if let Some(command) = command {
+                match command {
+                    "echo" => {
+                        println!("{}", args.collect::<Vec<&str>>().join(" "));
+                    }
+                    "clear" => {
+                        vga_buffer::WRITER.lock().clear();
+                    }
+                    "" => {
+                        nop();
+                    }
+                    a => {
+                        println!("ERROR: Command not found: {a}")
+                    }
+                }
+                print!("Welcome to brevyos! / # ");
             }
+        } else if character == 8 as char {
+            INPUT_BUFFER.lock().pop();
+            vga_buffer::WRITER.lock().backspace();
+        } else {
+            INPUT_BUFFER.lock().push(character);
+            print!("{}", character);
         }
     }
 
