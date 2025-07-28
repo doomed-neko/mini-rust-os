@@ -156,11 +156,11 @@ macro_rules! back_space {
 }
 
 #[doc(hidden)]
-pub fn _print(args: fmt::Arguments) {
-    use core::fmt::Write;
-    x86_64::instructions::interrupts::without_interrupts(|| {
-        WRITER.lock().write_fmt(args).unwrap();
-    });
+pub fn _print(_args: fmt::Arguments) {
+    // use core::fmt::Write;
+    // x86_64::instructions::interrupts::without_interrupts(|| {
+    //     WRITER.lock().write_fmt(args).unwrap();
+    // });
 }
 
 #[test_case]
@@ -181,7 +181,7 @@ fn test_println_output() {
     let s = "Test string";
     x86_64::instructions::interrupts::without_interrupts(|| {
         let mut writer = WRITER.lock();
-        writeln!(writer, "\n{}", s).expect("writeln failed");
+        writeln!(writer, "\n{s}").expect("writeln failed");
         for (i, c) in s.chars().enumerate() {
             let schar = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
             assert_eq!(c, char::from(schar.ascii_code));

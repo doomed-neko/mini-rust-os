@@ -1,35 +1,15 @@
 [package]
-name = "brevyos"
+name = "brevy_os"
 version = "0.1.0"
 edition = "2024"
+default-run = "brevy_os"
 
-[[test]]
-name = "should_panic"
-harness = false
-
-[[test]]
-name = "stack_overflow"
-harness = false
+[workspace]
+members = ["kernel"]
 
 [dependencies]
-bootloader = { version = "0.9", features = ["map_physical_memory"] }
-volatile = "0.2.6"
-spin = "0.5.2"
-x86_64 = "0.14.2"
-uart_16550 = "0.2.0"
-pic8259 = "0.10.1"
-pc-keyboard = "0.7.0"
-linked_list_allocator = "0.9.0"
-lazy_static = { version = "1.0", features = ["spin_no_std"] }
+ovmf-prebuilt = "0.2.3"
 
-
-[package.metadata.bootimage]
-test-args = [
-    "-device",
-    "isa-debug-exit,iobase=0xf4,iosize=0x04",
-    "-serial",
-    "stdio",
-    "-display",
-    "none",
-]
-test-success-exit-code = 33 # (0x10 << 1) | 1
+[build-dependencies]
+kernel = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }
+bootloader = "0.11.10"

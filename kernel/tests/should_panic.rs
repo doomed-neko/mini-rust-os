@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use brevyos::{QemuExitCode, exit_qemu, serial_print, serial_println};
+use kernel::{QemuExitCode, exit_qemu, serial_print, serial_println};
 use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)]
