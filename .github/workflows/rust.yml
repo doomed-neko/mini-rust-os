@@ -16,20 +16,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Install deps
+
+      - name: Install APT dependencies
         uses: tecolicom/actions-use-apt-tools@v1
         with:
           tools: qemu-system-x86 qemu-system qemu-utils
           cache: yes
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly-2025-06-25-x86_64-unknown-linux-gnu
-          override: true
           components: rust-src, llvm-tools-preview
+
+      - name: Cache Cargo & Build Artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Cache cargo-install binaries
+        id: cache-cargo-bin
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/bootimage
+          key: ${{ runner.os }}-bootimage-0.9.0
+
       - name: Install bootimage
-        run: cargo install bootimage --version 0.9.0
+        if: steps.cache-cargo-bin.outputs.cache-hit != 'true'
+        run: cargo install bootimage --version 0.9.0 --locked
+
       - name: Build
-        run: cargo build --verbose
+        run: cargo build
+
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test
