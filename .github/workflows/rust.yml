@@ -19,7 +19,7 @@ jobs:
       - name: Install deps
         uses: tecolicom/actions-use-apt-tools@v1
         with:
-          tools: qemu-kvm qemu-system qemu-utils
+          tools: qemu-system-x86 qemu-system qemu-utils
           cache: yes
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
