@@ -16,10 +16,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Get toolchain
-        run: rustup toolchain install nightly-2025-06-25-x86_64-unknown-linux-gnu
-      - name: Get toolchain components
-        run: rustup component add rust-src --toolchain nightly-2025-06-25-x86_64-unknown-linux-gnu
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2025-06-25-x86_64-unknown-linux-gnu
+          override: true
+          components: rust-src, llvm-tools-preview
       - name: Install bootimage
         run: cargo install bootimage --version 0.9.0
       - name: Build
