@@ -20,7 +20,7 @@ jobs:
       - name: Install APT dependencies
         uses: tecolicom/actions-use-apt-tools@v1
         with:
-          tools: qemu-system-x86 qemu-system qemu-utils
+          tools: qemu-system-x86 qemu-system qemu-utils libfdt-dev
           cache: yes
 
       - name: Install Rust Toolchain
