@@ -16,8 +16,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+      - name: Install deps
+        uses: tecolicom/actions-use-apt-tools@v1
+        with:
+          tools: qemu-kvm qemu-system qemu-utils
+          cache: yes
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
