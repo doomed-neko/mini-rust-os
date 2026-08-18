@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 use alloc::boxed::Box;
-use bootloader::{BootInfo, entry_point};
+use bootloader_api::{BootInfo, BootloaderConfig, config::Mapping, entry_point};
 use brevyos::{
     allocator,
     memory::{self, BootInfoFrameAllocator},
@@ -17,15 +17,27 @@ use x86_64::VirtAddr;
 
 extern crate alloc;
 
-entry_point!(kernel_main);
+pub static BOOTLOADER_CONFIG: BootloaderConfig = {
+    let mut config = BootloaderConfig::new_default();
+    config.mappings.physical_memory = Some(Mapping::Dynamic);
+    config
+};
 
-fn kernel_main(boot_info: &'static BootInfo) -> ! {
+// add a `config` argument to the `entry_point` macro call
+entry_point!(kernel_main, config = &BOOTLOADER_CONFIG);
+
+fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     println!("Hello World{}", "!");
     brevyos::init();
 
-    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let phys_mem_offset = VirtAddr::new(
+        boot_info
+            .physical_memory_offset
+            .into_option()
+            .expect("phys mem offset"),
+    );
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
-    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_regions) };
 
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
     // allocate a number on the heap

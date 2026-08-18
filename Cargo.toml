@@ -8,3 +8,9 @@ members = ["kernel"]
 default-members = ["kernel"]
 
 [dependencies]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

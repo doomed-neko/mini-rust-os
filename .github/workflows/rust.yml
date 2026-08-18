@@ -43,7 +43,7 @@ jobs:
         run: cargo install bootimage --version 0.9.0 --locked
 
       - name: Build
-        run: cargo build
+        run: make kernel
 
       - name: Run tests
-        run: cargo test
+        run: make test
