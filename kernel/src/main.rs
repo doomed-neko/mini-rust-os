@@ -9,7 +9,7 @@ use bootloader_api::{BootInfo, BootloaderConfig, config::Mapping, entry_point};
 use brevyos::{
     allocator,
     memory::{self, BootInfoFrameAllocator},
-    print, println,
+    // print, println,
     task::{Task, executor::Executor, keyboard},
 };
 use core::panic::PanicInfo;
@@ -27,7 +27,7 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 entry_point!(kernel_main, config = &BOOTLOADER_CONFIG);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    println!("Hello World{}", "!");
+    // println!("Hello World{}", "!");
     brevyos::init();
 
     let phys_mem_offset = VirtAddr::new(
@@ -42,8 +42,8 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
     // allocate a number on the heap
     let heap_value = Box::new(41);
-    println!("heap_value at {:p}", heap_value);
-    print!("Welcome to brevyos! / # ");
+    // println!("heap_value at {:p}", heap_value);
+    // print!("Welcome to brevyos! / # ");
 
     #[cfg(test)]
     test_main();
@@ -59,7 +59,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 fn panic(info: &PanicInfo) -> ! {
     use brevyos::hlt_loop;
 
-    println!("{}", info);
+    // println!("{}", info);
     hlt_loop();
 }
 

@@ -14,7 +14,7 @@ pub mod interrupts;
 pub mod memory;
 pub mod serial;
 pub mod task;
-pub mod vga_buffer;
+// pub mod vga_buffer;
 
 extern crate alloc;
 
@@ -67,7 +67,6 @@ fn test_kernel_main(_boot_info: &'static mut BootInfo) -> ! {
 fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
 }
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum QemuExitCode {

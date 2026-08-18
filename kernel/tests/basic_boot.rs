@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![allow(clippy::empty_loop)]
 
-use brevyos::println;
+// use brevyos::println;
 use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)] // don't mangle the name of this function
@@ -22,5 +22,5 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[test_case]
 fn test_println() {
-    println!("test_println output");
+    // println!("test_println output");
 }
