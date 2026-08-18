@@ -4,12 +4,10 @@
 #![test_runner(brevyos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use alloc::boxed::Box;
 use bootloader_api::{BootInfo, BootloaderConfig, config::Mapping, entry_point};
 use brevyos::{
     allocator,
     memory::{self, BootInfoFrameAllocator},
-    // print, println,
     task::{Task, executor::Executor, keyboard},
 };
 use core::panic::PanicInfo;
@@ -27,8 +25,10 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 entry_point!(kernel_main, config = &BOOTLOADER_CONFIG);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    // println!("Hello World{}", "!");
-    brevyos::init();
+    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+        let info = framebuffer.info();
+        brevyos::init(framebuffer.buffer_mut(), info);
+    }
 
     let phys_mem_offset = VirtAddr::new(
         boot_info
@@ -40,10 +40,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_regions) };
 
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
-    // allocate a number on the heap
-    let heap_value = Box::new(41);
-    // println!("heap_value at {:p}", heap_value);
-    // print!("Welcome to brevyos! / # ");
 
     #[cfg(test)]
     test_main();
@@ -56,7 +52,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 /// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
+fn panic(_info: &PanicInfo) -> ! {
     use brevyos::hlt_loop;
 
     // println!("{}", info);

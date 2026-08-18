@@ -35,8 +35,8 @@ pub fn init_idt() {
 }
 
 extern "x86-interrupt" fn page_fault_handler(
-    stack_frame: InterruptStackFrame,
-    error_code: PageFaultErrorCode,
+    _stack_frame: InterruptStackFrame,
+    _error_code: PageFaultErrorCode,
 ) {
     // use x86_64::registers::control::Cr2;
 
@@ -47,7 +47,7 @@ extern "x86-interrupt" fn page_fault_handler(
     hlt_loop();
 }
 
-extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
+extern "x86-interrupt" fn breakpoint_handler(_stack_frame: InterruptStackFrame) {
     // println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
 }
 

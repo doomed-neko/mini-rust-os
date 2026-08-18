@@ -48,8 +48,11 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     hlt_loop();
 }
 
+use bootloader_api::info::FrameBufferInfo;
 #[cfg(test)]
 use bootloader_api::{BootInfo, entry_point};
+use bootloader_x86_64_common::logger::LockedLogger;
+use conquer_once::spin::OnceCell;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
@@ -89,11 +92,21 @@ pub fn hlt_loop() -> ! {
     }
 }
 
-pub fn init() {
+pub fn init(buffer: &'static mut [u8], info: FrameBufferInfo) {
     gdt::init();
     interrupts::init_idt();
     unsafe {
         interrupts::PICS.lock().initialize();
     }
     x86_64::instructions::interrupts::enable();
+    init_logger(buffer, info);
+}
+
+pub(crate) static LOGGER: OnceCell<LockedLogger> = OnceCell::uninit();
+
+pub(crate) fn init_logger(buffer: &'static mut [u8], info: FrameBufferInfo) {
+    let logger = LOGGER.get_or_init(move || LockedLogger::new(buffer, info, true, false));
+    log::set_logger(logger).expect("Logger already set");
+    log::set_max_level(log::LevelFilter::Trace);
+    log::info!("Hello, Kernel Mode!");
 }
