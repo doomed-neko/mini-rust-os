@@ -12,7 +12,8 @@ ovmf-prebuilt = "0.2.4"
 
 [build-dependencies]
 brevyos = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }
-bootloader = "0.11"
+bootloader = { version = "0.11", default-features = false, features = ["bios"] }
+bootloader-boot-config = "0.11"
 
 [profile.dev]
 panic = "abort"

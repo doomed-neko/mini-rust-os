@@ -1,5 +1,8 @@
 use std::path::PathBuf;
 
+use bootloader::BootConfig;
+use bootloader_boot_config::LevelFilter;
+
 fn main() {
     // set by cargo, build scripts should use this directory for output files
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
@@ -14,8 +17,12 @@ fn main() {
     //     .unwrap();
 
     // create a BIOS disk image
+    let mut config = BootConfig::default();
+    config.frame_buffer_logging = false;
+    config.log_level = LevelFilter::Off;
     let bios_path = out_dir.join("bios.img");
     bootloader::BiosBoot::new(&kernel)
+        .set_boot_config(&config)
         .create_disk_image(&bios_path)
         .unwrap();
 

@@ -61,6 +61,7 @@ use bootloader_api::{BootInfo, entry_point};
 use bootloader_x86_64_common::logger::LockedLogger;
 use conquer_once::spin::OnceCell;
 use uart_16550::SerialPort;
+use x86_64::instructions::interrupts::without_interrupts;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
@@ -116,8 +117,10 @@ pub fn init(buffer: &'static mut [u8], info: FrameBufferInfo) {
 pub(crate) static LOGGER: OnceCell<LockedLogger> = OnceCell::uninit();
 
 pub(crate) fn init_logger(buffer: &'static mut [u8], info: FrameBufferInfo) {
-    let logger = LOGGER.get_or_init(move || LockedLogger::new(buffer, info, true, false));
+    let logger = LOGGER.get_or_init(move || LockedLogger::new(buffer, info, true, true));
     log::set_logger(logger).expect("Logger already set");
     log::set_max_level(log::LevelFilter::Trace);
-    log::info!("Hello, Kernel Mode!");
+    without_interrupts(|| {
+        log::info!("Hello, kernel mode");
+    });
 }

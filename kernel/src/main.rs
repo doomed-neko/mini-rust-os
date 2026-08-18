@@ -11,7 +11,8 @@ use brevyos::{
     task::{Task, executor::Executor, keyboard},
 };
 use core::panic::PanicInfo;
-use x86_64::VirtAddr;
+use log::info;
+use x86_64::{VirtAddr, instructions::interrupts::without_interrupts};
 
 extern crate alloc;
 
@@ -43,6 +44,12 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
     #[cfg(test)]
     test_main();
+
+    loop {
+        without_interrupts(|| {
+            info!("hello world from main");
+        });
+    }
 
     let mut executor = Executor::new();
     executor.spawn(Task::new(keyboard::print_keypresses()));
