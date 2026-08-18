@@ -20,7 +20,10 @@ fn main(boot_info: &'static mut BootInfo) -> ! {
     use brevyos::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    brevyos::init();
+    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+        let info = framebuffer.info();
+        brevyos::init(framebuffer.buffer_mut(), info);
+    }
     let phys_mem_offset = VirtAddr::new(
         boot_info
             .physical_memory_offset

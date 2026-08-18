@@ -11,6 +11,8 @@ fn main() {
 
     qemu.args(["-vga", "std"]);
     qemu.args(["-serial", "mon:stdio"]);
+    qemu.args(["-audiodev", "pa,id=speaker"]);
+    qemu.args(["-machine", "pcspk-audiodev=speaker"]);
     qemu.args(["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]);
 
     qemu.arg("-drive")

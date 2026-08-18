@@ -13,8 +13,15 @@ pub mod gdt;
 pub mod interrupts;
 pub mod memory;
 pub mod serial;
+pub mod sound;
 pub mod task;
 // pub mod vga_buffer;
+pub fn outb(port: u16, val: u8) {
+    unsafe { SerialPort::new(port).send(val) };
+}
+pub fn inb(port: u16) -> u8 {
+    unsafe { SerialPort::new(port).receive() }
+}
 
 extern crate alloc;
 
@@ -53,14 +60,18 @@ use bootloader_api::info::FrameBufferInfo;
 use bootloader_api::{BootInfo, entry_point};
 use bootloader_x86_64_common::logger::LockedLogger;
 use conquer_once::spin::OnceCell;
+use uart_16550::SerialPort;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
 
 /// Entry point for `cargo test`
 #[cfg(test)]
-fn test_kernel_main(_boot_info: &'static mut BootInfo) -> ! {
-    init();
+fn test_kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+        let info = framebuffer.info();
+        init(framebuffer.buffer_mut(), info);
+    }
     test_main();
     hlt_loop();
 }
